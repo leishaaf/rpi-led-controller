@@ -63,6 +63,7 @@ def update_sign():
     global sign_message
     data = request.json
     CURRENT_DIRECTORY = path.dirname(path.abspath(__file__)) + sep
+    print("yoooooo:", data, flush=True)
     success = False
     if proc != None:
         proc.kill()
@@ -80,4 +81,4 @@ def update_sign():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True, threaded=True)
+    app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
