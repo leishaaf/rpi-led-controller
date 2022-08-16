@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from os import sep, path
 import random
 import subprocess
+from subprocess import Popen, PIPE, STDOUT
 
 from sign_message import SignMessage
 
@@ -75,7 +76,8 @@ def update_sign():
         return jsonify({
             "success": success
         })
-    except:
+    except Exception as e:
+        print(e, flush=True)
         sign_message = None
         return "Could not update sign", 500
 

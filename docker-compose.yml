@@ -1,0 +1,15 @@
+version: '2'
+services:
+  sce_led_sign:
+    container_name: sce_led_sign
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ~/.ssh/known_hosts:/app/ssh/known_hosts
+      - ~/.ssh/id_rsa:/app/ssh/id_rsa
+      - ~/.ssh/id_rsa.pub:/app/ssh/id_rsa.pub
+    ports:
+      - '80:80'
+    tty: true
+    privileged: true
