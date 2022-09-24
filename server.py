@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
 from os import sep, path
+from prometheus_client import Gauge, generate_latest
 import random
 import subprocess
+import time
 from subprocess import Popen, PIPE, STDOUT
 
 from sign_message import SignMessage
@@ -10,6 +12,7 @@ proc = None
 sign_message = None
 app = Flask(__name__)
 
+neel = Gauge('neel', '1 if up 0 if not')
 
 def hex_to_rgb(hex_value):
     return ",".join([str(int(hex_value[i:i+2], 16)) for i in (0, 2, 4)])
@@ -17,6 +20,7 @@ def hex_to_rgb(hex_value):
 
 @app.route("/api/health-check", methods=["GET"])
 def health_check():
+    neel.set(int(time.time()))
     global sign_message
     if sign_message:
         return jsonify(sign_message.to_dict())
@@ -25,6 +29,9 @@ def health_check():
             "success": True
         })
 
+@app.route("/metrics", methods=["GET"])
+def metrics():
+    return generate_latest()
 
 @app.route("/api/random", methods=["GET"])
 def random_message():

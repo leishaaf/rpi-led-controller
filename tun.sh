@@ -29,5 +29,6 @@ chmod 600 ${DOCKER_CONTAINER_SSH_KEYS}
 
 open_ssh_tunnel
 
+python /app/alerting.py 
 python /app/server.py
 

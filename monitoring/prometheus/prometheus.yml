@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'cadvisor'
+    static_configs: 
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'sce_led_sign'
+    static_configs:
+      - targets: ['sce_led_sign:80']
