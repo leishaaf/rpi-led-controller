@@ -2,7 +2,7 @@ import requests
 import time
 
 def checkUpStatus():
-    response = requests.get("http://192.168.69.143:9090/api/v1/query?query=time()-neel")
+    response = requests.get("http://<ip>:9090/api/v1/query?query=time()-neel")
     response = json.loads(response.text)
     if(int((response['data']['result'][0]['value'][1]).split(".")[0]) > 40):
         discordMessage("It is Down")
@@ -10,7 +10,7 @@ def checkUpStatus():
         print("no need")
 
 def discordMessage(message):
-    url = "https://discord.com/api/webhooks/981743754975281212/vDmBiz5f1fV5ZjEWzij35axeio9I6KyjrDHSJehSaXLDnD9ZLhB802UapLp8YxxT_MjU"
+    url = "<webhook>"
     data = {
         "content": "Tunnels Are Down",
         "username": "Neel"
