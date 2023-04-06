@@ -3,6 +3,7 @@ from os import sep, path
 from prometheus_client import Gauge, generate_latest
 import random
 import subprocess
+import threading
 import time
 from subprocess import Popen, PIPE, STDOUT
 
@@ -13,9 +14,30 @@ sign_message = None
 app = Flask(__name__)
 
 neel = Gauge('neel', '1 if up 0 if not')
+ssh_tunnel_last_opened = Gauge('ssh_tunnel_last_opened', 'the last time we opened the ssh tunnel')
 
 def hex_to_rgb(hex_value):
     return ",".join([str(int(hex_value[i:i+2], 16)) for i in (0, 2, 4)])
+
+def maybe_reopen_ssh_tunnel():
+    """
+    if we havent recieved a health check ping in over 1 min then
+    we rerun the script to open the ssh tunnel.
+    """
+    while 1:
+        now_epoch_seconds = int(time.time())
+        # skip reopening the tunnel if the value is 0 or falsy
+        if not neel._value.get():
+            continue
+        if now_epoch_seconds - neel._value.get() > 60:
+            ssh_tunnel_last_opened.set(now_epoch_seconds)
+            subprocess.Popen(
+                './tun.sh tunnel-only',
+                shell=True,
+                stderr=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+            )
+        time.sleep(60)
 
 
 @app.route("/api/health-check", methods=["GET"])
@@ -71,7 +93,6 @@ def update_sign():
     global sign_message
     data = request.json
     CURRENT_DIRECTORY = path.dirname(path.abspath(__file__)) + sep
-    print("yoooooo:", data, flush=True)
     success = False
     if proc != None:
         proc.kill()
@@ -90,4 +111,9 @@ def update_sign():
 
 
 if __name__ == "__main__":
+    t = threading.Thread(
+        target=maybe_reopen_ssh_tunnel,
+        daemon=True,
+    )
+    t.start()
     app.run(host="0.0.0.0", port=80, debug=True, threaded=True)

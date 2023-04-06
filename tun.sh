@@ -23,12 +23,22 @@ open_ssh_tunnel () {
 
 ls /app
 ls /app/ssh
-echo "here"
 
 chmod 600 ${DOCKER_CONTAINER_SSH_KEYS}
 
 open_ssh_tunnel
 
-python /app/alerting.py 
-python /app/server.py
+# if no value is sent along with the invocation of the script,
+# run the server. otherwise just open the ssh tunnel. i.e.
+#
+# to open the tunnel and start the server:
+# $ ./tun.sh 
+#
+# to only open the tunnel:
+# $ ./tun.sh tunnel-only
+if [ -z "$1" ]
+then
+    python /app/alerting.py 
+    python /app/server.py
+fi
 
