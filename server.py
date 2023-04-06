@@ -25,6 +25,7 @@ def maybe_reopen_ssh_tunnel():
     we rerun the script to open the ssh tunnel.
     """
     while 1:
+        time.sleep(60)
         now_epoch_seconds = int(time.time())
         # skip reopening the tunnel if the value is 0 or falsy
         if not neel._value.get():
@@ -37,7 +38,6 @@ def maybe_reopen_ssh_tunnel():
                 stderr=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
             )
-        time.sleep(60)
 
 
 @app.route("/api/health-check", methods=["GET"])
