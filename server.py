@@ -30,7 +30,7 @@ def maybe_reopen_ssh_tunnel():
         # skip reopening the tunnel if the value is 0 or falsy
         if not neel._value.get():
             continue
-        if now_epoch_seconds - neel._value.get() > 60:
+        if now_epoch_seconds - neel._value.get() > 120:
             ssh_tunnel_last_opened.set(now_epoch_seconds)
             subprocess.Popen(
                 './tun.sh tunnel-only',
