@@ -111,6 +111,10 @@ def update_sign():
 
 
 if __name__ == "__main__":
+    # give the last opened an initial value of now,
+    # since upon starting the led sign the tunnel should
+    # be open
+    ssh_tunnel_last_opened.set(int(time.time()))
     t = threading.Thread(
         target=maybe_reopen_ssh_tunnel,
         daemon=True,
