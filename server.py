@@ -13,7 +13,10 @@ proc = None
 sign_message = None
 app = Flask(__name__)
 
-neel = Gauge('neel', '1 if up 0 if not')
+last_health_check_request = Gauge(
+    'last_health_check_request',
+    'the last time the server recieved an HTTP GET request to /api/health-check',
+)
 ssh_tunnel_last_opened = Gauge('ssh_tunnel_last_opened', 'the last time we opened the ssh tunnel')
 
 def hex_to_rgb(hex_value):
@@ -28,9 +31,9 @@ def maybe_reopen_ssh_tunnel():
         time.sleep(60)
         now_epoch_seconds = int(time.time())
         # skip reopening the tunnel if the value is 0 or falsy
-        if not neel._value.get():
+        if not last_health_check_request._value.get():
             continue
-        if now_epoch_seconds - neel._value.get() > 120:
+        if now_epoch_seconds - last_health_check_request._value.get() > 120:
             ssh_tunnel_last_opened.set(now_epoch_seconds)
             subprocess.Popen(
                 './tun.sh tunnel-only',
@@ -42,7 +45,7 @@ def maybe_reopen_ssh_tunnel():
 
 @app.route("/api/health-check", methods=["GET"])
 def health_check():
-    neel.set(int(time.time()))
+    last_health_check_request.set(int(time.time()))
     global sign_message
     if sign_message:
         return jsonify(sign_message.to_dict())
