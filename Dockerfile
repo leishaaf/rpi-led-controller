@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 COPY tun.sh .
 COPY ./config/config.json /app/config/ 
+COPY sce_sign.exe .
 
 COPY *.py ./
 
