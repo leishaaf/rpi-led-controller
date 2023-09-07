@@ -10,10 +10,7 @@ RUN python3 -m pip install -r requirements.txt
 COPY tun.sh .
 COPY ./config/config.json /app/config/ 
 
-COPY ./monitoring/alerting.py .
-COPY . .
-RUN ls
-RUN echo "jfwiejfweio"
+COPY *.py ./
 
 RUN chmod +x sce_sign.exe
 RUN chmod +x tun.sh
