@@ -13,6 +13,8 @@ COPY sce_sign.exe .
 
 COPY *.py ./
 
+COPY 10x20.bdf .
+
 RUN chmod +x sce_sign.exe
 RUN chmod +x tun.sh
 RUN mkdir /app/ssh
@@ -20,3 +22,4 @@ RUN mkdir /app/ssh
 EXPOSE 5000
 
 ENTRYPOINT ["/app/tun.sh"]
+
