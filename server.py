@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+import argparse
+from flask import Flask, request, jsonify, render_template
 from os import sep, path
 from prometheus_client import Gauge, generate_latest
 import random
@@ -12,6 +13,19 @@ from sign_message import SignMessage
 proc = None
 sign_message = None
 app = Flask(__name__)
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--development',
+    action='store_true',
+    help='if set, runs in dev mode (skip ssh tunnel and running binary file)',
+)
+parser.add_argument(
+    '--port',
+    type=int,
+    default=80,
+    help='port for server to listen on',
+)
+args = parser.parse_args()
 
 last_health_check_request = Gauge(
     'last_health_check_request',
@@ -111,16 +125,19 @@ def update_sign():
         print(e, flush=True)
         sign_message = None
         return "Could not update sign", 500
-
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 if __name__ == "__main__":
     # give the last opened an initial value of now,
     # since upon starting the led sign the tunnel should
     # be open
     ssh_tunnel_last_opened.set(int(time.time()))
-    t = threading.Thread(
-        target=maybe_reopen_ssh_tunnel,
-        daemon=True,
-    )
-    t.start()
-    app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
+    if not args.development:
+        t = threading.Thread(
+            target=maybe_reopen_ssh_tunnel,
+            daemon=True,
+        )
+        t.start()
+    app.run(host="0.0.0.0", port=args.port, debug=True, threaded=True)

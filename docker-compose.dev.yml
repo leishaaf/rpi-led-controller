@@ -1,0 +1,10 @@
+version: '2'
+services:
+  sce_led_sign:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    ports:
+      - '7000:7000'
+    volumes:
+      - ./static:/app/templates

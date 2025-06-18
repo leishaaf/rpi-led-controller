@@ -1,0 +1,16 @@
+FROM python:3.8.4-slim-buster
+
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install jq ssh -y
+
+COPY requirements.txt .
+RUN python3 -m pip install -r requirements.txt
+
+COPY *.py ./
+
+EXPOSE 7000
+
+ENTRYPOINT ["python", "server.py", "--development", "--port=7000"]
+

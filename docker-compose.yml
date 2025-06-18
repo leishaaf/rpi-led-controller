@@ -9,6 +9,7 @@ services:
       - ~/.ssh/known_hosts:/app/ssh/known_hosts
       - ~/.ssh/id_rsa:/app/ssh/id_rsa
       - ~/.ssh/id_rsa.pub:/app/ssh/id_rsa.pub
+      - ./static:/app/templates
     ports:
       - '80:80'
     tty: true
