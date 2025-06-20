@@ -116,7 +116,10 @@ def update_sign():
     try:
         if data and len(data):
             sign_message = SignMessage(data)
-            proc = subprocess.Popen(sign_message.to_subprocess_command())
+            command = sign_message.to_subprocess_command()
+            print("running command", command, flush=True)
+            if not args.development:
+                proc = subprocess.Popen(command)
         success = True
         return jsonify({
             "success": success
