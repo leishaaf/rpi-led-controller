@@ -10,8 +10,10 @@ from subprocess import Popen, PIPE, STDOUT
 
 from sign_message import SignMessage
 
+initial = {"scrollSpeed": 5, "backgroundColor": "#ffffff", "textColor": "#000000", "borderColor": "#ffffff", "text": " "}
+
 proc = None
-sign_message = None
+sign_message = SignMessage(initial)
 app = Flask(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -95,13 +97,19 @@ def turn_off():
     global proc
     global sign_message
     success = False
+    if args.development:
+      success = True
+      sign_message = None
+
     if proc != None:
         proc.kill()
         sign_message = None
         success = True
+
     return jsonify({
         "success": success
     })
+
 
 
 @app.route("/api/update-sign", methods=["POST"])
