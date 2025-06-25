@@ -6,6 +6,13 @@
     <title>SCE LED Sign</title>
 </head>
 <body>
-    <h3>hello from the sign :D</h3>
+
+    <marquee id = "test" direction ="left" scrollamount = {{sign_message.to_dict()['scrollSpeed']}} style = "border-style: solid; border-width: 10px; font-family: monospace;font-size: 50px;">{{sign_message.to_dict()['text']}}</marquee>
+    <script>
+    document.getElementById("test").style.color = '{{sign_message.to_dict()['textColor']}}';
+    document.getElementById("test").style.backgroundColor = '{{sign_message.to_dict()['backgroundColor']}}';
+    document.getElementById("test").style.borderColor = '{{sign_message.to_dict()['borderColor']}}';
+    </script>
 </body>
+
 </html>

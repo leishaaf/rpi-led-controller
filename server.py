@@ -130,7 +130,7 @@ def update_sign():
         return "Could not update sign", 500
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html',sign_message = sign_message)
 
 if __name__ == "__main__":
     # give the last opened an initial value of now,
