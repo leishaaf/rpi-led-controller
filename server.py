@@ -99,7 +99,7 @@ def turn_off():
     success = False
     if args.development:
       success = True
-      sign_message = None
+      sign_message = SignMessage(initial)
 
     if proc != None:
         proc.kill()
