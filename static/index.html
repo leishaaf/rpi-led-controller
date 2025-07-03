@@ -6,12 +6,44 @@
     <title>SCE LED Sign</title>
 </head>
 <body>
-
-    <marquee id = "test" direction ="left" scrollamount = {{sign_message.to_dict()['scrollSpeed']}} style = "border-style: solid; border-width: 10px; font-family: monospace;font-size: 50px;">{{sign_message.to_dict()['text']}}</marquee>
+   <h3 id = "isOff" style= "display: none">Sign is Off</h3>
+    <marquee id = "test" direction ="left" style = "width: 150px; border-style: solid; border-width: 5px; font-family: monospace;font-size: 20px;"/>
+ 
     <script>
-    document.getElementById("test").style.color = '{{sign_message.to_dict()['textColor']}}';
-    document.getElementById("test").style.backgroundColor = '{{sign_message.to_dict()['backgroundColor']}}';
-    document.getElementById("test").style.borderColor = '{{sign_message.to_dict()['borderColor']}}';
+        const handleFetch = async () =>{
+            url = new URL('api/health-check', window.location.origin)
+            try{
+                const res = await fetch(url.href);
+                if(!res.ok){
+                throw new Error("Could not fetch resource"); 
+                }
+
+                const data = await res.json();
+
+                console.log(Object.hasOwn(data, 'text'));
+
+                if (Object.hasOwn(data, 'text')) {
+                    document.getElementById("test").style.color = data.textColor;
+                    document.getElementById("test").style.backgroundColor = data.backgroundColor;
+                    document.getElementById("test").style.borderColor = data.borderColor;
+                    document.getElementById("test").innerHTML = data.text;
+                    document.getElementById("test").setAttribute('scrollamount', data.scrollSpeed);
+                    document.getElementById("test").style.display = 'block';
+
+                    document.getElementById("isOff").style.display = 'none';
+                return;
+                } else {   
+                    document.getElementById("isOff").style.display = 'block';
+                    document.getElementById("test").style.display = 'none';
+                }
+
+
+            }catch(err){
+                console.log(err)
+            }
+        }
+            handleFetch();
+        
     </script>
 </body>
 
