@@ -6,6 +6,8 @@ import random
 import subprocess
 import threading
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo 
 
 from subprocess import Popen, PIPE, STDOUT
 
@@ -14,17 +16,17 @@ from sign_message import SignMessage
 proc = None
 sign_message = None
 
+threadExists = False
+cancel_event = threading.Event()
+
 def turnOff():
     global proc
     global sign_message
-    success = False
     if args.development:
-      success = True
       sign_message = None
     if proc != None:
         proc.kill()
         sign_message = None
-        success = True
 
 
 
@@ -110,7 +112,7 @@ def random_message():
 def turn_off():
     turnOff()
     return jsonify({
-        "success": success
+        "success": True
     })
 
 
@@ -119,6 +121,7 @@ def turn_off():
 def update_sign():
     global proc
     global sign_message
+
     data = request.json
     CURRENT_DIRECTORY = path.dirname(path.abspath(__file__)) + sep
     success = False
@@ -131,6 +134,7 @@ def update_sign():
             print("running command", command, flush=True)
             if not args.development:
                 proc = subprocess.Popen(command)
+            
         success = True
         return jsonify({
             "success": success
@@ -139,6 +143,58 @@ def update_sign():
         print(e, flush=True)
         sign_message = None
         return "Could not update sign", 500
+    
+
+    
+@app.route("/set-time", methods=["GET"])
+def setTime():
+    global threadExists
+    global cancel_event
+
+    if sign_message == None:
+        return jsonify({
+            "Sign": "Already Expired"
+        })
+    if request.args.get("endTime") == '':
+        return jsonify({
+            "Sign": "Never Expires"
+        })
+    print("TIE CALLED AND ORIENTATION IS TOMORROW!!!!!", flush=True)
+
+    format_code = "%Y-%m-%dT%H:%M"
+    endTime = datetime.strptime(request.args.get("endTime"), format_code)
+    endTime = endTime.replace(tzinfo=ZoneInfo("America/Los_Angeles"))
+    currDate = datetime.now(ZoneInfo("America/Los_Angeles"))
+    print(currDate)
+    print(endTime)
+
+    ts = abs((endTime - currDate).total_seconds())
+
+    if threadExists:
+         print("canceleddd", flush=True)
+         cancel_event.set()
+         cancel_event = threading.Event()
+
+    currThread = threading.Thread(target=expire, args=(ts,))
+    
+    currThread.start()
+    threadExists = True
+
+    return jsonify({
+        "endTime": endTime,
+        "today": currDate,
+        "time": ts
+    })
+
+def expire(exp):
+    print("expire called with a timeout of", exp, flush=True)
+    if cancel_event.wait(timeout=exp):
+        print("forget it lol", flush=True)
+        return
+    print("untied lmao", flush=True)
+    turnOff()
+
+
 @app.route('/')
 def home():       
    return render_template('index.html')
