@@ -28,6 +28,13 @@ def turnOff():
         proc.kill()
         sign_message = None
 
+def expire(exp):
+    print("expire called with a timeout of", exp, flush=True)
+    if cancel_event.wait(timeout=exp):
+        print("forget it lol", flush=True)
+        return
+    print("untied lmao", flush=True)
+    turnOff()
 
 
 app = Flask(__name__)
@@ -117,13 +124,52 @@ def turn_off():
 
 
 
-@app.route("/api/update-sign", methods=["POST"])
+@app.route("/api/update-sign", methods=["POST", "GET"])
 def update_sign():
     global proc
     global sign_message
+    global threadExists
+    global cancel_event
+
+    if request.method == "GET":
+        if sign_message == None:
+            return jsonify({
+                "Sign": "Already Expired"
+            })
+    
+        if request.args.get("endTime") == '':
+            return jsonify({
+                "Sign": "Never Expires"
+            })
+        print("TIE CALLED AND ORIENTATION IS TOMORROW!!!!!", flush=True)
+
+        format_code = "%Y-%m-%dT%H:%M"
+        endTime = datetime.strptime(request.args.get("endTime"), format_code)
+        endTime = endTime.replace(tzinfo=ZoneInfo("America/Los_Angeles"))
+        currDate = datetime.now(ZoneInfo("America/Los_Angeles"))
+        print(currDate)
+        print(endTime)
+
+        ts = abs((endTime - currDate).total_seconds())
+
+        if threadExists:
+            print("canceleddd", flush=True)
+            cancel_event.set()
+            cancel_event = threading.Event()
+
+        currThread = threading.Thread(target=expire, args=(ts,))
+        
+        currThread.start()
+        threadExists = True
+        return jsonify({
+            "endTime": endTime,
+            "today": currDate,
+            "time": ts
+        })
 
     data = request.json
     CURRENT_DIRECTORY = path.dirname(path.abspath(__file__)) + sep
+
     success = False
     if proc != None:
         proc.kill()
@@ -134,8 +180,7 @@ def update_sign():
             print("running command", command, flush=True)
             if not args.development:
                 proc = subprocess.Popen(command)
-            
-        success = True
+            success = True
         return jsonify({
             "success": success
         })
@@ -144,55 +189,6 @@ def update_sign():
         sign_message = None
         return "Could not update sign", 500
     
-
-    
-@app.route("/set-time", methods=["GET"])
-def setTime():
-    global threadExists
-    global cancel_event
-
-    if sign_message == None:
-        return jsonify({
-            "Sign": "Already Expired"
-        })
-    if request.args.get("endTime") == '':
-        return jsonify({
-            "Sign": "Never Expires"
-        })
-    print("TIE CALLED AND ORIENTATION IS TOMORROW!!!!!", flush=True)
-
-    format_code = "%Y-%m-%dT%H:%M"
-    endTime = datetime.strptime(request.args.get("endTime"), format_code)
-    endTime = endTime.replace(tzinfo=ZoneInfo("America/Los_Angeles"))
-    currDate = datetime.now(ZoneInfo("America/Los_Angeles"))
-    print(currDate)
-    print(endTime)
-
-    ts = abs((endTime - currDate).total_seconds())
-
-    if threadExists:
-         print("canceleddd", flush=True)
-         cancel_event.set()
-         cancel_event = threading.Event()
-
-    currThread = threading.Thread(target=expire, args=(ts,))
-    
-    currThread.start()
-    threadExists = True
-
-    return jsonify({
-        "endTime": endTime,
-        "today": currDate,
-        "time": ts
-    })
-
-def expire(exp):
-    print("expire called with a timeout of", exp, flush=True)
-    if cancel_event.wait(timeout=exp):
-        print("forget it lol", flush=True)
-        return
-    print("untied lmao", flush=True)
-    turnOff()
 
 
 @app.route('/')
