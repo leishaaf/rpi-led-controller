@@ -1,70 +1,59 @@
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SCE LED Sign</title>
-</head>
-<body>
-   
-   <marquee id = "test" direction ="left" style = "width: 150px; border-style: solid; border-width: 5px; font-family: monospace;font-size: 20px;"></marquee>
-   <h3 id = "isOff" style= "display: block">Sign is Off</h3>
-   <form id="tie" method = "get" action = "/api/update-sign" method="post">
-        <input
-            type="datetime-local"
-            id="endTime"
-            name="endTime"
-         />
-       <input type="submit" value="Submit Time" />
-    </form>
- 
+  </head>
+
+  <body>
+    <h3 id="isOff" style="display: none">Sign is Off</h3>
+    <marquee
+      id="sign-preview"
+      direction="left"
+      style="
+        width: 150px;
+        border-style: solid;
+        border-width: 5px;
+        font-family: monospace;
+        font-size: 20px;
+      "
+    />
+
     <script>
-        // Get current time in UTC milliseconds
-        const nowUtc = new Date().getTime();
+      const handleFetch = async () => {
+        url = new URL("api/health-check", window.location.origin);
+        try {
+          const res = await fetch(url.href);
+          if (!res.ok) {
+            throw new Error("Could not fetch resource");
+          }
 
-        const newTime = new Date(nowUtc - 7 * 60 * 60 * 1000);
+          const data = await res.json();
 
-        // Format as "YYYY-MM-DDTHH:mm" (datetime-local expects no seconds or timezone)
-        const isoString = newTime.toISOString().slice(0, 16);
+          console.log(Object.hasOwn(data, "text"));
 
-        // Set the min attribute
-        document.getElementById("endTime").min = isoString;
+          if (!Object.hasOwn(data, "text")) {
+            document.getElementById("sign-preview").style.display = "none";
 
-        const handleFetch = async () =>{
-            url = new URL('api/health-check', window.location.origin)
-            try{
-                const res = await fetch(url.href);
-                if(!res.ok){
-                throw new Error("Could not fetch resource"); 
-                }
-
-                const data = await res.json();
-
-                console.log(Object.hasOwn(data, 'text'));
-
-                if (Object.hasOwn(data, 'text')) {
-                    document.getElementById("test").style.color = data.textColor;
-                    document.getElementById("test").style.backgroundColor = data.backgroundColor;
-                    document.getElementById("test").style.borderColor = data.borderColor;
-                    document.getElementById("test").innerHTML = data.text;
-                    document.getElementById("test").setAttribute('scrollamount', data.scrollSpeed);
-                    document.getElementById("test").style.display = 'block';
-
-                    document.getElementById("isOff").style.display = 'none';
-                return;
-                } else {   
-                    document.getElementById("isOff").style.display = 'block';
-                    document.getElementById("test").style.display = 'none';
-                }
-
-
-            }catch(err){
-                console.log(err)
-            }
+            document.getElementById("isOff").style.display = "block";
+            return;
+          }
+          document.getElementById("sign-preview").style.color = data.textColor;
+          document.getElementById("sign-preview").style.backgroundColor =
+            data.backgroundColor;
+          document.getElementById("sign-preview").style.borderColor =
+            data.borderColor;
+          document.getElementById("sign-preview").innerHTML = data.text;
+          document
+            .getElementById("sign-preview")
+            .setAttribute("scrollamount", data.scrollSpeed);
+        } catch (err) {
+          console.log(err);
         }
-            handleFetch();
-        
+      };
+      handleFetch();
     </script>
-</body>
-
+  </body>
 </html>

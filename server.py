@@ -1,4 +1,3 @@
-
 import argparse
 from flask import Flask, request, jsonify, render_template
 from os import sep, path
