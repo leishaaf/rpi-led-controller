@@ -5,6 +5,7 @@ services:
       context: .
       dockerfile: ./Dockerfile.dev
     ports:
-      - '10000:7000'
+      - '10000:10000'
     volumes:
-      - ./static:/app/templates
+      - ./static:/app/static
+      - ./server.py:/app/server.py

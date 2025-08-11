@@ -11,6 +11,6 @@ services:
       - ~/.ssh/id_rsa.pub:/app/ssh/id_rsa.pub
       - ./static:/app/templates
     ports:
-      - '80:80'
+      - '80:10000'
     tty: true
     privileged: true

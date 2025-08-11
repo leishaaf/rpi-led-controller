@@ -13,11 +13,14 @@ COPY sce_sign.exe .
 
 COPY *.py ./
 
+
 COPY 10x20.bdf .
 
 RUN chmod +x sce_sign.exe
 RUN chmod +x tun.sh
 RUN mkdir /app/ssh
+
+COPY ./static /app/static
 
 EXPOSE 5000
 
