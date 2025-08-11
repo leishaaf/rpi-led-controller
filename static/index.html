@@ -22,7 +22,7 @@
 
     <script>
       const handleFetch = async () => {
-        url = new URL("api/health-check", window.location.origin);
+        url = new URL("health-check", window.location.origin);
         try {
           const res = await fetch(url.href);
           if (!res.ok) {
